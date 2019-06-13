@@ -11,6 +11,7 @@
 
 #include <QTime>
 #include <QCoreApplication>
+#include <QVBoxLayout>
 
 #include <QDebug>
 

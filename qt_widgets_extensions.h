@@ -12,7 +12,6 @@
 
 #include <QListWidget>
 #include <QToolButton>
-#include <QVBoxLayout>
 #include <QPropertyAnimation>
 
 namespace qt_ext
