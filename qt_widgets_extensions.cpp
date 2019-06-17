@@ -72,7 +72,8 @@ namespace qt_ext
 
             this->setLayout(outer_layout);
 
-            init_animation();
+            if(animated)
+                init_animation();
         }
     }
     void QExpandableWidget::clearContent()
