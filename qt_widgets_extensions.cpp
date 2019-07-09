@@ -34,11 +34,11 @@ namespace qt_ext
     {
         toggle->setText(title);
     }
-    void QExpandableWidget::setContent(QWidget * b, STRETCHING header_stretching)
+    void QExpandableWidget::setContents(QWidget * b, STRETCHING header_stretching)
     {
-        setContent(b, nullptr, header_stretching);
+        setContents(b, nullptr, header_stretching);
     }
-    void QExpandableWidget::setContent(QWidget * b, QWidget * h, STRETCHING header_stretching)
+    void QExpandableWidget::setContents(QWidget * b, QWidget * h, STRETCHING header_stretching)
     {
         if(body != nullptr)
             qWarning() << "qt_ext::QExpandableWidget::setContent : Already existing content -> nothing to be done";
@@ -76,7 +76,7 @@ namespace qt_ext
                 init_animation();
         }
     }
-    void QExpandableWidget::clearContent()
+    void QExpandableWidget::clearContents()
     {
         if(animated)
         {
@@ -108,6 +108,18 @@ namespace qt_ext
     {
         return duration;
     }
+    QWidget * QExpandableWidget::getHeader()
+    {
+        return header;
+    }
+    QWidget * QExpandableWidget::getBody()
+    {
+        return body;
+    }
+    QToolButton * QExpandableWidget::getToggle()
+    {
+        return toggle;
+    }
     void QExpandableWidget::init_toggle(const QString & title)
     {
         if(toggle == nullptr)
@@ -134,7 +146,6 @@ namespace qt_ext
     {
         if(checked)
         {
-            emit heightChanged(expand_height);
             toggle->setArrowType(Qt::ArrowType::DownArrow);
             if(!animated)
                 body->setMaximumHeight(expand_height);
@@ -144,6 +155,7 @@ namespace qt_ext
                 toggleAnimation->setEndValue(expand_height);
                 toggleAnimation->start();
             }
+            emit heightChanged(expand_height);
         }
         else
         {

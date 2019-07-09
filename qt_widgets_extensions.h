@@ -39,11 +39,14 @@ namespace qt_ext
             QExpandableWidget(const QString & title, BEHAVIOUR animation, QWidget * parent = nullptr);
             virtual ~QExpandableWidget();
             void setTitle(const QString & title);
-            void setContent(QWidget * b, STRETCHING header_stretching = TO_LEFT);
-            void setContent(QWidget * b, QWidget * h, STRETCHING header_stretching = TO_LEFT);
-            void clearContent();
+            void setContents(QWidget * b, STRETCHING header_stretching = TO_LEFT);
+            void setContents(QWidget * b, QWidget * h, STRETCHING header_stretching = TO_LEFT);
+            void clearContents();
             bool isAnimated() const;
             unsigned int getDuration() const;
+            QWidget * getHeader();
+            QWidget * getBody();
+            QToolButton * getToggle();
 
         private:
             void init_toggle(const QString & title);
