@@ -4,11 +4,10 @@
  * Copyright (c) 2019, Raphaël Lefèvre
  *
  * Author: Raphaël Lefèvre
- * Repository: https://github.com/rlefevre1/Qt-extensions
 */
 
-#ifndef WIDGETS_EXTENSIONS_H
-#define WIDGETS_EXTENSIONS_H
+#ifndef QT_WIDGETS_EXTENSIONS_H
+#define QT_WIDGETS_EXTENSIONS_H
 
 #include <QListWidget>
 #include <QToolButton>
@@ -76,4 +75,4 @@ namespace qt_ext
     // ---------- ---------- ---------- ---------- ----------
 }
 
-#endif // WIDGETS_EXTENSIONS_H
+#endif // QT_WIDGETS_EXTENSIONS_H

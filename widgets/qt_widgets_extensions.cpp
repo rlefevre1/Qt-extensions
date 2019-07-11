@@ -4,10 +4,9 @@
  * Copyright (c) 2019, Raphaël Lefèvre
  *
  * Author: Raphaël Lefèvre
- * Repository: https://github.com/rlefevre1/Qt-extensions
 */
 
-#include "qt_widgets_extensions.h"
+#include "qt_widgets_extensions.hpp"
 
 #include <QTime>
 #include <QCoreApplication>
