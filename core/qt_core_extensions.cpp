@@ -17,7 +17,7 @@ namespace qt_ext
     {
         QTime die_time = QTime::currentTime().addMSecs(ms);
         while(QTime::currentTime() < die_time)
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
     }
     void delay_s(int s)
     {
