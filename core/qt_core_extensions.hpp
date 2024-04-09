@@ -11,8 +11,10 @@
 
 namespace qt_ext
 {
-    void delay_ms(int ms);
-    void delay_s(int s);
+    void delay_ms(unsigned int ms);
+    void delay_s(unsigned int s);
+    void wait_ms(unsigned int ms);
+    void wait_s(unsigned int s);
 }
 
 #endif // QT_CORE_EXTENSIONS_H
