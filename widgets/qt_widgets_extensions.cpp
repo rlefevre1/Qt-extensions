@@ -11,8 +11,8 @@
 #include <QTime>
 #include <QCoreApplication>
 #include <QVBoxLayout>
-
-#include <QDebug>
+#include <QPainter>
+#include <QPaintEvent>
 
 namespace qt_ext
 {
@@ -22,6 +22,7 @@ namespace qt_ext
     {
         init_toggle(title);
     }
+
     QExpandableWidget::~QExpandableWidget()
     {
         delete toggle;
@@ -29,21 +30,20 @@ namespace qt_ext
         delete body;
         delete toggleAnimation;
     }
+
     void QExpandableWidget::setTitle(const QString & title)
     {
         toggle->setText(title);
     }
-    void QExpandableWidget::setContents(QWidget * b, STRETCHING header_stretching)
+
+    bool QExpandableWidget::setContents(QWidget * b, STRETCHING header_stretching)
     {
-        setContents(b, nullptr, header_stretching);
+        return setContents(b, nullptr, header_stretching);
     }
-    void QExpandableWidget::setContents(QWidget * b, QWidget * h, STRETCHING header_stretching)
+
+    bool QExpandableWidget::setContents(QWidget * b, QWidget * h, STRETCHING header_stretching)
     {
-        if(body != nullptr)
-            qWarning() << "qt_ext::QExpandableWidget::setContent : Already existing content -> nothing to be done";
-        else if(b == nullptr)
-            qWarning() << "qt_ext::QExpandableWidget::setContent : No body given -> nothing to be done";
-        else
+        if(body == nullptr && b != nullptr) // If no existing body and one is given
         {
             header = h;
             body = b;
@@ -73,8 +73,12 @@ namespace qt_ext
 
             if(animated)
                 init_animation();
+
+            return true;
         }
+        return false;
     }
+
     void QExpandableWidget::clearContents()
     {
         if(animated)
@@ -99,26 +103,32 @@ namespace qt_ext
             body = nullptr;
         }
     }
+
     bool QExpandableWidget::isAnimated() const
     {
         return animated;
     }
+
     unsigned int QExpandableWidget::getDuration() const
     {
         return duration;
     }
+
     QWidget * QExpandableWidget::getHeader()
     {
         return header;
     }
+
     QWidget * QExpandableWidget::getBody()
     {
         return body;
     }
+
     QToolButton * QExpandableWidget::getToggle()
     {
         return toggle;
     }
+
     void QExpandableWidget::init_toggle(const QString & title)
     {
         if(toggle == nullptr)
@@ -133,6 +143,7 @@ namespace qt_ext
             connect(toggle, &QToolButton::toggled, this, &QExpandableWidget::expand_collapse);
         }
     }
+
     void QExpandableWidget::init_animation()
     {
         if(toggleAnimation == nullptr)
@@ -141,6 +152,7 @@ namespace qt_ext
             toggleAnimation->setDuration(static_cast<int>(duration));
         }
     }
+
     void QExpandableWidget::expand_collapse(bool checked)
     {
         if(checked)
@@ -173,25 +185,24 @@ namespace qt_ext
     // ========== ========== ========== ========== ==========
 
     // ========== ========== ========== ========== ==========
-    QListWidgetView::QListWidgetView(QWidget * parent) : QListWidget(parent)
+    QListWidget::QListWidget(QWidget * parent) : ::QListWidget(parent)
     {}
-    void QListWidgetView::addWidget(QWidget * w)
+
+    void QListWidget::addWidget(QWidget * w)
     {
         QListWidgetItem * item = new QListWidgetItem(this);
         this->addItem(item);
         item->setSizeHint(w->sizeHint());
         this->setItemWidget(item, w);
     }
-    void QListWidgetView::addWidget(QExpandableWidget * ew)
-    {
-        QListWidgetItem * item = new QListWidgetItem(this);
-        this->addItem(item);
-        item->setSizeHint(ew->sizeHint());
-        this->setItemWidget(item, ew);
 
-        connect(ew, &QExpandableWidget::heightChanged, this, &QListWidgetView::itemHeightChanged);
+    void QListWidget::addWidget(QExpandableWidget * ew)
+    {
+        addWidget(qobject_cast<QWidget*>(ew));
+        connect(ew, &QExpandableWidget::heightChanged, this, &QListWidget::itemHeightChanged);
     }
-    void QListWidgetView::itemHeightChanged(int delta)
+
+    void QListWidget::itemHeightChanged(int delta)
     {
         QExpandableWidget * ew = qobject_cast<QExpandableWidget*>(sender());
         if(ew != nullptr)
@@ -212,6 +223,127 @@ namespace qt_ext
                     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
             }
             item(i)->setSizeHint(QSize(ew->sizeHint().width(), item(i)->sizeHint().height()+delta));
+        }
+    }
+    // ========== ========== ========== ========== ==========
+
+    // ========== ========== ========== ========== ==========
+    bool QMultiSegmentBar::addSegment(const QString & label, unsigned int weight, const QBrush & background, const QColor & foreground)
+    {
+        bool valid = true;
+        for(const segment & s : segments)
+        {
+            if(s.label == label)
+            {
+                valid = false;
+                break;
+            }
+        }
+
+        if(valid)
+        {
+            segments.append({label, weight, background, foreground});
+            total_weight += weight;
+            update();
+        }
+
+        return valid;
+    }
+
+    bool QMultiSegmentBar::removeSegment(const QString & label)
+    {
+        int idx = -1;
+        unsigned int weight {};
+        for(int i = 0; i < segments.size(); ++i)
+        {
+            if(segments[i].label == label)
+            {
+                idx = i;
+                weight = segments[i].weight;
+                break;
+            }
+        }
+
+        if(idx >= 0)
+        {
+            segments.removeAt(idx);
+            total_weight -= weight;
+            update();
+        }
+
+        return (idx >= 0);
+    }
+
+    void QMultiSegmentBar::clear()
+    {
+        segments.clear();
+        update();
+    }
+
+    bool QMultiSegmentBar::moveWeight(const QString & label_from, const QString & label_to, unsigned int value)
+    {
+        segment * seg_from = nullptr;
+        segment * seg_to = nullptr;
+
+        unsigned int flag = 0;
+        for(auto it = segments.begin(); flag < 2 && it != segments.end(); ++it)
+        {
+            if(it->label == label_from)
+            {
+                seg_from = &(*it);
+                ++flag;
+            }
+
+            if(it->label == label_to)
+            {
+                seg_to = &(*it);
+                ++flag;
+            }
+        }
+
+        if(flag == 2 && seg_from->weight >= value)
+        {
+            seg_from->weight -= value;
+            seg_to->weight += value;
+            update();
+
+            return true;
+        }
+        else
+            return false;
+    }
+
+    void QMultiSegmentBar::setDisplayMode(DISPLAY_MODE disp_mode)
+    {
+        display_mode = disp_mode;
+        update();
+    }
+
+    void QMultiSegmentBar::paintEvent(QPaintEvent * pe)
+    {
+        QPainter painter(this);
+
+        QRect seg_area {0, 0, 0, pe->rect().height()};
+        for(const segment & s : segments)
+        {
+            // Define the segment with
+            seg_area.setWidth(s.weight * pe->rect().width() / total_weight);
+
+            // Paint
+            QString txt = s.label;
+
+            if(display_mode == PERCENTAGES)
+                txt.append(" (" + QString::number(qRound(s.weight * 100.0 / total_weight)) + "%)");
+
+            else if(display_mode == WEIGHTS)
+                txt.append(" (" + QString::number(s.weight) + ')');
+
+            painter.fillRect(seg_area, s.background);
+            painter.setPen(s.foreground);
+            painter.drawText(seg_area, Qt::AlignCenter, txt);
+
+            // Update starting point for next segment
+            seg_area.setX(seg_area.x() + seg_area.width());
         }
     }
     // ========== ========== ========== ========== ==========

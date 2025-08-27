@@ -57,8 +57,8 @@ MainWindow::MainWindow()
     QWidget * wid = new QWidget;
     QVBoxLayout * lay = new QVBoxLayout;
 
-    qt_ext::QListWidgetView * lwv = new qt_ext::QListWidgetView(this);
-    lwv->setVerticalScrollMode(qt_ext::QListWidgetView::ScrollPerPixel);
+    qt_ext::QListWidget * lwv = new qt_ext::QListWidget(this);
+    lwv->setVerticalScrollMode(qt_ext::QListWidget::ScrollPerPixel);
 
     qt_ext::QExpandableWidget * ew1 = new qt_ext::QExpandableWidget("First", qt_ext::QExpandableWidget::DIRECT, lwv);
     qt_ext::QExpandableWidget * ew2 = new qt_ext::QExpandableWidget("Second", qt_ext::QExpandableWidget::DIRECT, lwv);
@@ -86,7 +86,6 @@ MainWindow::MainWindow()
 
     lay->addWidget(lwv);
     lay->addWidget(ew);
-    lay->addStretch();
 
     wid->setLayout(lay);
     this->setCentralWidget(wid);
@@ -94,6 +93,20 @@ MainWindow::MainWindow()
     lwv->setStyleSheet("QListWidget {background-color: rgb(64, 64, 64);}");
     this->setStyleSheet("QMainWindow {background-color: rgb(32, 32, 32);}");
     ew->getToggle()->setStyleSheet("QToolButton {border: none; color: white;}");
+
+    qt_ext::QMultiSegmentBar * msb = new qt_ext::QMultiSegmentBar(this);
+    msb->addSegment("Immutable", 2, Qt::cyan);
+    msb->addSegment("To", 0, Qt::green);
+    msb->addSegment("From", 6, Qt::gray);
+    msb->setDisplayMode(qt_ext::QMultiSegmentBar::DISPLAY_MODE::PERCENTAGES);
+    QPushButton * consume_pb = new QPushButton("Consume one", this);
+    QHBoxLayout * seg_lay = new QHBoxLayout;
+    seg_lay->addWidget(consume_pb);
+    seg_lay->addWidget(msb, 1);
+    connect(consume_pb, &QPushButton::clicked, this, [msb](){msb->moveWeight("From", "To", 1);});
+
+    lay->addLayout(seg_lay);
+    lay->addStretch();
 }
 
 int main(int argc, char ** argv)
