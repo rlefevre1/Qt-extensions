@@ -321,29 +321,32 @@ namespace qt_ext
 
     void QMultiSegmentBar::paintEvent(QPaintEvent * pe)
     {
-        QPainter painter(this);
-
-        QRect seg_area {0, 0, 0, pe->rect().height()};
-        for(const segment & s : segments)
+        if(total_weight)
         {
-            // Define the segment with
-            seg_area.setWidth(s.weight * pe->rect().width() / total_weight);
-
-            // Paint
-            QString txt = s.label;
-
-            if(display_mode == PERCENTAGES)
-                txt.append(" (" + QString::number(qRound(s.weight * 100.0 / total_weight)) + "%)");
-
-            else if(display_mode == WEIGHTS)
-                txt.append(" (" + QString::number(s.weight) + ')');
-
-            painter.fillRect(seg_area, s.background);
-            painter.setPen(s.foreground);
-            painter.drawText(seg_area, Qt::AlignCenter, txt);
-
-            // Update starting point for next segment
-            seg_area.setX(seg_area.x() + seg_area.width());
+            QPainter painter(this);
+    
+            QRect seg_area {0, 0, 0, pe->rect().height()};
+            for(const segment & s : segments)
+            {
+                // Define the segment with
+                seg_area.setWidth(s.weight * pe->rect().width() / total_weight);
+    
+                // Paint
+                QString txt = s.label;
+    
+                if(display_mode == PERCENTAGES)
+                    txt.append(" (" + QString::number(qRound(s.weight * 100.0 / total_weight)) + "%)");
+    
+                else if(display_mode == WEIGHTS)
+                    txt.append(" (" + QString::number(s.weight) + ')');
+    
+                painter.fillRect(seg_area, s.background);
+                painter.setPen(s.foreground);
+                painter.drawText(seg_area, Qt::AlignCenter, txt);
+    
+                // Update starting point for next segment
+                seg_area.setX(seg_area.x() + seg_area.width());
+            }
         }
     }
     // ========== ========== ========== ========== ==========
